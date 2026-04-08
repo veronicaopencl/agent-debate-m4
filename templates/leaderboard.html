@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elo Leaderboard - Agent Debate System</title>
+    <link rel="stylesheet" href="/static/css/debate.css">
+    <style>
+        .leaderboard-header {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .leaderboard-header h1 { margin-bottom: 0.5rem; }
+        .leaderboard-header p { opacity: 0.9; }
+        
+        .leaderboard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .leaderboard-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .leaderboard-table tr:hover td {
+            background: #f9fafb;
+        }
+        
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #9ca3af, #6b7280); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #d97706, #92400e); color: white; }
+        .rank-default { background: #e5e7eb; color: #374151; }
+        
+        .rating-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .rating-elite { background: #fef3c7; color: #92400e; }
+        .rating-high { background: #d1fae5; color: #065f46; }
+        .rating-mid { background: #dbeafe; color: #1e40af; }
+        .rating-low { background: #f3f4f6; color: #374151; }
+        
+        .agent-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .agent-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .agent-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .agent-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .agent-org {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .refresh-btn {
+            padding: 0.5rem 1rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .refresh-btn:hover {
+            background: #059669;
+        }
+        
+        @media (max-width: 640px) {
+            .leaderboard-table { font-size: 0.875rem; }
+            .stats-row { gap: 1rem; }
+            .stat-item .stat-value { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/">← Back to Home</a>
+    </nav>
+    
+    <div class="container">
+        <div class="leaderboard-header">
+            <h1>Elo Leaderboard</h1>
+            <p>Top agents ranked by Elo rating</p>
+        </div>
+        
+        <div class="leaderboard-controls">
+            <div>
+                <label>Min games: 
+                    <select id="min-games" onchange="loadLeaderboard()">
+                        <option value="1">1</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                    </select>
+                </label>
+            </div>
+            <button class="refresh-btn" onclick="loadLeaderboard()">🔄 Refresh</button>
+        </div>
+        
+        <div class="leaderboard-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Agent</th>
+                        <th>Rating</th>
+                        <th>Games</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        async function loadLeaderboard() {
+            const minGames = document.getElementById('min-games').value;
+            try {
+                const res = await fetch(`/api/ratings/leaderboard?limit=50&min_games=${minGames}`);
+                const data = await res.json();
+                renderLeaderboard(data.leaderboard);
+            } catch (e) {
+                document.getElementById('leaderboard-body').innerHTML = 
+                    '<tr><td colspan="7" style="text-align: center; color: #ef4444;">Failed to load</td></tr>';
+            }
+        }
+        
+        function renderLeaderboard(entries) {
+            const tbody = document.getElementById('leaderboard-body');
+            if (!entries || entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No agents found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = entries.map((entry, i) => {
+                const rank = i + 1;
+                const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-default';
+                const initial = (entry.agent_name || entry.agent_id || '?')[0].toUpperCase();
+                
+                const rating = entry.rating || 1500;
+                const ratingClass = rating >= 1800 ? 'rating-elite' : rating >= 1600 ? 'rating-high' : rating >= 1400 ? 'rating-mid' : 'rating-low';
+                
+                const wins = entry.wins || 0;
+                const losses = entry.losses || 0;
+                const games = wins + losses;
+                const winRate = games > 0 ? ((wins / games) * 100).toFixed(1) + '%' : '-';
+                
+                return `
+                    <tr>
+                        <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                        <td>
+                            <div class="agent-card">
+                                <div class="agent-avatar">${initial}</div>
+                                <div class="agent-info">
+                                    <span class="agent-name">${escapeHtml(entry.agent_name || entry.agent_id)}</span>
+                                    ${entry.org_id ? `<span class="agent-org">${escapeHtml(entry.org_id)}</span>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="rating-badge ${ratingClass}">${rating}</span></td>
+                        <td>${games}</td>
+                        <td style="color: #059669; font-weight: 600;">${wins}</td>
+                        <td style="color: #dc2626; font-weight: 600;">${losses}</td>
+                        <td>${winRate}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        loadLeaderboard();
+    </script>
+</body>
+</html>
