@@ -9,5 +9,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source
 COPY . .
 
-# Init DB on startup via entrypoint wrapper
-ENTRYPOINT ["sh", "-c", "python -c 'from src.database import init_db; init_db()' && uvicorn main:app --host 0.0.0.0 --port $PORT"]
+# Init DB on startup, then run uvicorn
+CMD python -c "from src.database import init_db; init_db()" && uvicorn main:app --host 0.0.0.0 --port $PORT
