@@ -796,7 +796,7 @@ def health_check():
     db_status = "disconnected"
     try:
         db = SessionLocal()
-        db.execute(db.text("SELECT 1"))
+        db.execute(text("SELECT 1"))
         db.close()
         db_status = "connected"
     except Exception:
