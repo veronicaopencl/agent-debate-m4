@@ -190,9 +190,10 @@ def list_debates(
 @app.get("/debates/{debate_id}", response_model=DebateResponse)
 def get_debate(debate_id: str, db: Session = Depends(get_db)):
     """Get a specific debate by ID."""
+    from src.models import Turn
     debate = db.query(Debate).options(
         joinedload(Debate.participants),
-        joinedload(Debate.turns)
+        joinedload(Debate.turns).joinedload(Turn.participant)
     ).filter(Debate.id == debate_id).first()
     
     if not debate:
@@ -377,6 +378,28 @@ def list_turns(
         })
     
     return result
+
+
+# ============== Audit Log Endpoints ==============
+
+@app.get("/debates/{debate_id}/log")
+def get_debate_log(debate_id: str, db: Session = Depends(get_db)):
+    """Get the audit log for a debate."""
+    from src.models import AuditLog
+    logs = db.query(AuditLog).filter(AuditLog.debate_id == debate_id).order_by(AuditLog.timestamp.asc()).all()
+    return {
+        "log": [
+            {
+                "id": log.id,
+                "event_type": log.event_type,
+                "data": log.event_data or {},
+                "actor": log.actor_id,
+                "actor_type": log.actor_type,
+                "timestamp": log.timestamp.isoformat() if log.timestamp else None,
+            }
+            for log in logs
+        ]
+    }
 
 
 # ============== Score/Judging Endpoints ==============
@@ -773,7 +796,7 @@ def health_check():
     db_status = "disconnected"
     try:
         db = SessionLocal()
-        db.execute(text("SELECT 1"))
+        db.execute(db.text("SELECT 1"))
         db.close()
         db_status = "connected"
     except Exception:
@@ -791,18 +814,6 @@ def health_check():
 def root(request: Request):
     """Serve the landing page."""
     return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/debate-room", response_class=HTMLResponse)
-def debate_room(request: Request):
-    """Serve the debate room / join page."""
-    return templates.TemplateResponse("debate.html", {"request": request})
-
-
-@app.get("/create-debate", response_class=HTMLResponse)
-def create_debate_page(request: Request):
-    """Serve the create debate page."""
-    return templates.TemplateResponse("create-debate.html", {"request": request})
 
 
 # ============== HTML Template Routes ==============

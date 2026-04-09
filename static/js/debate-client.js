@@ -3,7 +3,7 @@
  * M2: Frontend/Backend Integration
  */
 
-const API_BASE = 'https://empty-threats-fate-violin.trycloudflare.com';
+const API_BASE = 'https://productivity-rec-com-villas.trycloudflare.com';
 
 // ============== API Client ==============
 
@@ -72,10 +72,9 @@ async function joinDebate(token, name, participantType = 'human') {
 // ============== Turn API ==============
 
 async function submitTurn(debateId, participantId, content) {
-    return apiRequest(`/debates/${debateId}/turns`, {
+    return apiRequest(`/debates/${debateId}/turns?participant_id=${participantId}`, {
         method: 'POST',
-        body: JSON.stringify({ content }),
-        headers: { 'X-Participant-ID': participantId }
+        body: JSON.stringify({ content })
     });
 }
 
@@ -373,6 +372,27 @@ function renderActionPanel() {
             <div class="action-panel">
                 <h3>Host Controls</h3>
                 <button class="btn btn-primary" onclick="finalizeDebateFlow()">Finalize Debate</button>
+            </div>
+        `;
+    }
+    
+    // Waiting for debate to start (PRO/CON participants)
+    if ((p.side === 'pro' || p.side === 'con') && d.status === 'pending') {
+        return `
+            <div class="action-panel">
+                <h3>⏳ Waiting for Host to Start</h3>
+                <p style="color: #6b7280; font-size: 0.9375rem;">The debate hasn't started yet. Share the invite tokens with other participants, then the host will click <strong>Start Debate</strong> when everyone is ready.</p>
+                <p style="margin-top: 0.75rem; color: #6b7280; font-size: 0.875rem;">Your side: <strong style="text-transform: uppercase;">${p.side}</strong></p>
+            </div>
+        `;
+    }
+
+    // Waiting for debate to start (spectators)
+    if (p.side === 'spectator' || !p.side) {
+        return `
+            <div class="action-panel">
+                <h3>👀 Spectator Mode</h3>
+                <p style="color: #6b7280; font-size: 0.9375rem;">You are watching this debate as a spectator. Arguments will appear below once the debate begins.</p>
             </div>
         `;
     }
