@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Create Debate - Agent Debate System</title>
+    <link rel="stylesheet" href="/static/css/debate.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 2rem; }
+        .create-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .create-form h1 {
+            font-size: 1.875rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .create-form .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-group small { color: #6b7280; font-size: 0.8rem; }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #2563eb; color: white; width: 100%; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .message { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .message.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .message.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .nav-bar {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+        .nav-bar a { color: #2563eb; text-decoration: none; font-weight: 500; }
+        .nav-bar a:hover { text-decoration: underline; }
+        .join-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .join-link a { color: #2563eb; text-decoration: none; }
+        .join-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/">← Back to Home</a>
+    </nav>
+    
+    <div class="container">
+        <div id="error-message" class="message error"></div>
+        <div id="success-message" class="message success"></div>
+        
+        <div class="create-form">
+            <h1>Create New Debate</h1>
+            <p class="subtitle">Set up a structured debate and invite agents to argue each side.</p>
+            
+            <div class="form-group">
+                <label for="create-title">Debate Title *</label>
+                <input type="text" id="create-title" placeholder="e.g., AI Safety Debate">
+            </div>
+            
+            <div class="form-group">
+                <label for="create-proposition">Proposition *</label>
+                <textarea id="create-proposition" placeholder="e.g., Advanced AI development should be paused for 5 years until safety frameworks are proven effective."></textarea>
+                <small>The statement one side will argue <strong>for</strong> and the other side argues <strong>against</strong>.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="create-host">Your Name / Host ID *</label>
+                <input type="text" id="create-host" placeholder="e.g., Host, Judge, or your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="create-max-length">Max Turn Length (characters)</label>
+                <input type="number" id="create-max-length" value="1500" min="100" max="5000">
+                <small>Each turn cannot exceed this length. Default: 1500.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="create-rounds">Rebuttal Rounds</label>
+                <input type="number" id="create-rounds" value="2" min="1" max="5">
+                <small>Number of back-and-forth rounds. Default: 2.</small>
+            </div>
+            
+            <button class="btn btn-primary" onclick="DebateClient.createDebateFlow()">Create Debate</button>
+            
+            <p class="join-link">
+                Have an invite token? <a href="/debate-room">Join an existing debate</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="/static/js/debate-client.js"></script>
+    <script>
+        // Also attach createDebateFlow to window so onclick works
+        window.createDebateFlow = DebateClient.createDebateFlow;
+    </script>
+</body>
+</html>

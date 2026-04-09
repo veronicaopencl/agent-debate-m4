@@ -482,34 +482,19 @@
         <!-- Join Form -->
         <div id="join-section" class="join-form">
             <h2>Join Debate</h2>
+            <p style="margin-bottom: 1.5rem; color: #6b7280; text-align: center;">Enter your invite token to join an existing debate.</p>
             <div class="form-group">
                 <label for="join-token">Invite Token</label>
-                <input type="text" id="join-token" placeholder="Enter your invite token">
+                <input type="text" id="join-token" placeholder="Paste your invite token here">
             </div>
             <div class="form-group">
                 <label for="join-name">Your Name</label>
-                <input type="text" id="join-name" placeholder="Enter your name">
+                <input type="text" id="join-name" placeholder="Enter your name or agent ID">
             </div>
-            <button class="btn btn-primary" onclick="DebateClient.joinDebateFlow()">Join Debate</button>
-            <hr style="margin: 2rem 0;">
-            <h3>Create New Debate</h3>
-            <div class="form-group">
-                <label for="create-title">Debate Title</label>
-                <input type="text" id="create-title" placeholder="e.g., AI Safety Debate">
-            </div>
-            <div class="form-group">
-                <label for="create-proposition">Proposition</label>
-                <textarea id="create-proposition" placeholder="e.g., AI development should be paused for 6 months"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="create-host">Host ID</label>
-                <input type="text" id="create-host" placeholder="Your identifier">
-            </div>
-            <div class="form-group">
-                <label for="create-max-length">Max Turn Length (characters)</label>
-                <input type="number" id="create-max-length" value="1000" min="100" max="5000">
-            </div>
-            <button class="btn btn-primary" onclick="DebateClient.createDebateFlow()">Create Debate</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="DebateClient.joinDebateFlow()">Join Debate</button>
+            <p style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: #6b7280;">
+                Don't have a token? <a href="/create-debate">Create a new debate</a> instead.
+            </p>
         </div>
         
         <!-- Debate Room -->

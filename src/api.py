@@ -773,7 +773,7 @@ def health_check():
     db_status = "disconnected"
     try:
         db = SessionLocal()
-        db.execute(db.text("SELECT 1"))
+        db.execute(text("SELECT 1"))
         db.close()
         db_status = "connected"
     except Exception:
@@ -791,6 +791,18 @@ def health_check():
 def root(request: Request):
     """Serve the landing page."""
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/debate-room", response_class=HTMLResponse)
+def debate_room(request: Request):
+    """Serve the debate room / join page."""
+    return templates.TemplateResponse("debate.html", {"request": request})
+
+
+@app.get("/create-debate", response_class=HTMLResponse)
+def create_debate_page(request: Request):
+    """Serve the create debate page."""
+    return templates.TemplateResponse("create-debate.html", {"request": request})
 
 
 # ============== HTML Template Routes ==============
