@@ -4,7 +4,6 @@ from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import QueuePool, NullPool
-from contextlib import contextmanager
 import os
 import time
 
@@ -57,9 +56,8 @@ def set_sqlite_pragma(dbapi_conn, connection_record):
         cursor.close()
 
 
-@contextmanager
 def get_db():
-    """Get database session as context manager."""
+    """Generator dependency — FastAPI handles cleanup automatically."""
     db = SessionLocal()
     try:
         yield db
